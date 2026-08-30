@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Payment Successful | AI Website to Cash</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:radial-gradient(circle at top,#29265c,transparent 35%),#0b0b12;color:#fff;min-height:100vh;display:grid;place-items:center;padding:24px}
+.card{width:100%;max-width:680px;text-align:center;background:#151522;border:1px solid #29293b;border-radius:24px;padding:42px 24px;box-shadow:0 20px 70px rgba(0,0,0,.35)}
+.icon{width:76px;height:76px;margin:0 auto 22px;border-radius:50%;display:grid;place-items:center;font-size:38px}
+.icon.success{background:#1f8f5f}
+.icon.fail{background:#a33636}
+.icon.loading{background:#3d3d5c}
+h1{margin-bottom:12px;font-size:clamp(28px,7vw,44px)}
+.description{color:#b8b8c8;line-height:1.7;margin:0 auto 30px;max-width:540px}
+.resources{display:grid;gap:14px;margin-top:24px}
+.resource{display:flex;align-items:center;gap:15px;text-align:left;text-decoration:none;color:#fff;background:#242438;border:1px solid #35354d;padding:18px 20px;border-radius:14px;font-weight:700;transition:transform .2s ease,background .2s ease}
+.resource:hover{transform:translateY(-2px);background:#2d2d45}
+.resource-icon{width:50px;height:50px;flex-shrink:0;display:grid;place-items:center;font-size:25px;background:#6c4cff;border-radius:12px}
+.resource-text h2{font-size:16px;margin-bottom:5px}
+.resource-text p{color:#a8a8bc;font-size:13px;line-height:1.5;font-weight:normal}
+.back{display:inline-block;margin-top:22px;color:#b8b8c8;text-decoration:none;font-size:14px}
+.note{font-size:13px;margin-top:24px;color:#858598}
+.spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none}
+.cta{display:inline-block;margin-top:18px;background:#6c4cff;color:#fff;text-decoration:none;font-weight:700;padding:12px 26px;border-radius:10px}
+</style>
+</head>
+<body>
+<main class="card" id="card">
+
+  <!-- LOADING STATE -->
+  <div id="state-loading">
+    <div class="icon loading"><div class="spinner"></div></div>
+    <h1>Verifying Payment…</h1>
+    <p class="description">Please wait while we confirm your payment with Cashfree. This only takes a moment.</p>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div id="state-success" class="hidden">
+    <div class="icon success">✓</div>
+    <h1>Payment Successful!</h1>
+    <p class="description">Thank you for your purchase. Your AI Website to Cash resources are ready to access.</p>
+    <div class="resources">
+      <a class="resource" href="AI-Website-to-Cash.docx" download>
+        <div class="resource-icon">📘</div>
+        <div class="resource-text"><h2>AI Website to Cash</h2><p>Download your complete digital guide.</p></div>
+      </a>
+      <a class="resource" href="AI-Website-Prompt-Bundle.docx" download>
+        <div class="resource-icon">🧠</div>
+        <div class="resource-text"><h2>AI Website Prompt Bundle</h2><p>Download your copy-and-paste prompt collection.</p></div>
+      </a>
+    </div>
+    <a class="back" href="index.html">← Back to Website</a>
+    <p class="note">Your resources are ready. Thank you for your purchase! 🚀</p>
+  </div>
+
+  <!-- FAILURE / UNVERIFIED STATE -->
+  <div id="state-fail" class="hidden">
+    <div class="icon fail">✕</div>
+    <h1>Payment Not Verified</h1>
+    <p class="description" id="fail-message">We couldn't confirm a completed payment for this order. If you completed a payment and are seeing this, please contact support with your order ID rather than retrying.</p>
+    <a class="cta" href="index.html#pricing">Return to Pricing</a>
+  </div>
+
+</main>
+
+<script>
+  (async function () {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id");
+
+    const showLoading = () => {
+      document.getElementById("state-loading").classList.remove("hidden");
+      document.getElementById("state-success").classList.add("hidden");
+      document.getElementById("state-fail").classList.add("hidden");
+    };
+    const showSuccess = () => {
+      document.getElementById("state-loading").classList.add("hidden");
+      document.getElementById("state-success").classList.remove("hidden");
+      document.getElementById("state-fail").classList.add("hidden");
+    };
+    const showFail = (message) => {
+      document.getElementById("state-loading").classList.add("hidden");
+      document.getElementById("state-success").classList.add("hidden");
+      document.getElementById("state-fail").classList.remove("hidden");
+      if (message) document.getElementById("fail-message").textContent = message;
+    };
+
+    if (!orderId) {
+      showFail("No order ID was provided. If you just completed a payment, please use the link from your checkout confirmation.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/verify-payment?order_id=${encodeURIComponent(orderId)}`);
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        showSuccess();
+      } else {
+        showFail(`This order is not marked as paid (status: ${data.order_status || "unknown"}). If you believe this is an error, contact support with order ID: ${orderId}`);
+      }
+    } catch (err) {
+      console.error(err);
+      showFail("We ran into a problem verifying your payment. Please refresh this page or contact support.");
+    }
+  })();
+</script>
+</body>
+</html>
